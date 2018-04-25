@@ -1,0 +1,19 @@
+---
+
+
+- hosts: all
+  gather_facts: false
+  connection: local
+  
+  tasks:
+   - name: Retrieve DNS Servers (Cisco)
+     ios_command:
+      commands:
+       - "show run | inc name-server"
+     register: show_nameserver
+   - debug: msg="{{ show_nameserver.stdout }}"  
+#   - name: save output to /etc/ansible/backups
+#     copy:
+#      content: "{{ show_run.stdout[0] }}"
+#      dest: "/etc/ansible/backups/{{ inventory_hostname }}_SH_RUN_{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}.txt"
+

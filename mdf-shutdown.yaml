@@ -1,0 +1,144 @@
+---
+- hosts: 127.0.0.1
+  gather_facts: flase
+  connection: local
+
+  tasks:
+   - name: Backup SVL-PAN
+     shell: curl -kG "https://10.10.22.10/api/?type=export&category=configuration&key=LUFRPT1Tc2dmd2RtTkczNXN6VjU4K2xQbGoyWkF3RlU9dzFEWG9JRFE0VVNFbTA5MGFsd0NJZk9TUnV1WG45c2ZvZUFCWGltSjlIVT0=" > /etc/ansible/backups/PAN-SVL-config__$(date -d "today" +"%Y%m%d%H%M").xml
+   - name: Backup EQX-PAN
+     shell: curl -kG "https://10.10.90.7/api/?type=export&category=configuration&key=LUFRPT1Tc2dmd2RtTkczNXN6VjU4K2xQbGoyWkF3RlU9dzFEWG9JRFE0VVNFbTA5MGFsd0NJZk9TUnV1WG45c2ZvZUFCWGltSjlIVT0=" > /etc/ansible/backups/PAN-EQX-config__$(date -d "today" +"%Y%m%d%H%M").xml
+
+
+
+
+
+- hosts: 995_mdf_devices
+  gather_facts: false
+  connection: local
+
+  tasks:
+   - name: Copy Run Start (Cisco)
+     ios_command:
+      commands:
+       - "copy run start"
+     register: wr_mem
+
+#   - name: save output to /etc/ansible/backups
+#     copy:
+#      content: "{{ wr_mem.stdout[0] }}"
+#      dest: "/etc/ansible/backups/{{ inventory_hostname }}_SH_RUN_{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}.txt"
+
+
+
+
+
+- hosts: 995_mdf_devices
+  gather_facts: false
+  connection: local
+  
+  tasks:
+   - name: Retrieve Configurations (Cisco)
+     ios_command:
+      commands:
+       - "show run"
+     register: show_run
+
+   - name: save output to /etc/ansible/backups
+     copy:
+      content: "{{ show_run.stdout[0] }}"
+      dest: "/etc/ansible/backups/{{ inventory_hostname }}_SH_RUN_{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}.txt"
+
+
+- hosts: 995_mdf_devices
+  gather_facts: false
+  connection: local
+
+  tasks:
+   - name: Get CDP info (Cisco)
+     ios_command:
+      commands:
+       - "show cdp nei"
+     register: cdp_nei
+
+   - name: save output to /etc/ansible/state
+     copy:
+      content: "{{ cdp_nei.stdout[0] }}"
+      dest: "/etc/ansible/state/{{ inventory_hostname }}_CDP_NEI_{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}.txt"
+
+
+
+- hosts: 995_mdf_devices
+  gather_facts: false
+  connection: local
+
+  tasks:
+   - name: Get Interface Brief (Cisco)
+     ios_command:
+      commands:
+       - "show ip int brief"
+     register: int_brief
+
+   - name: save output to /etc/ansible/state
+     copy:
+      content: "{{ int_brief.stdout[0] }}"
+      dest: "/etc/ansible/state/{{ inventory_hostname }}_INT_BRIEF_{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}.txt"
+
+
+
+- hosts: 995_mdf_switches
+  gather_facts: false
+  connection: local
+
+  tasks:
+   - name: Get VLAN info (Cisco)
+     ios_command:
+      commands:
+       - "show vlan"
+     register: sh_vlan
+
+   - name: save output to /etc/ansible/state
+     copy:
+      content: "{{ sh_vlan.stdout[0] }}"
+      dest: "/etc/ansible/state/{{ inventory_hostname }}_SH_VLAN_{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}.txt"
+
+
+
+
+
+- hosts: 995_mdf_devices
+  gather_facts: false
+  connection: local
+
+  tasks:
+   - name: Get Environmentals (Cisco)
+     ios_command:
+      commands:
+       - "show env all"
+     register: sh_env
+
+   - name: save output to /etc/ansible/state
+     copy:
+      content: "{{ sh_env.stdout[0] }}"
+      dest: "/etc/ansible/state/{{ inventory_hostname }}_SH_ENV_{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}.txt"
+
+
+
+
+- hosts: 995_mdf_switches
+  gather_facts: false
+  connection: local
+
+  tasks:
+   - name: Get Interface Status (Cisco)
+     ios_command:
+      commands:
+       - "show interface status"
+     register: int_status
+
+   - name: save output to /etc/ansible/state
+     copy:
+      content: "{{ int_status.stdout[0] }}"
+      dest: "/etc/ansible/state/{{ inventory_hostname }}_INT_STATUS_{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}.txt"
+
+
